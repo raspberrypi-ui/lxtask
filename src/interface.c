@@ -194,7 +194,7 @@ void create_list_store(void)
     GtkCellRenderer *cell_renderer;
 
     /* my change 8->9 */
-    list_store = gtk_tree_store_new(9, G_TYPE_STRING, G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING);
+    list_store = gtk_tree_store_new(10, G_TYPE_STRING, G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING);
 
     cell_renderer = gtk_cell_renderer_text_new();
 
@@ -217,6 +217,12 @@ void create_list_store(void)
     gtk_tree_view_column_set_resizable(column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, COLUMN_TIME);
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(list_store), COLUMN_TIME, compare_int_list_item, (void *)COLUMN_TIME, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+    column = gtk_tree_view_column_new_with_attributes(_("GPU%"), cell_renderer, "text", COLUMN_GPU, NULL);
+    gtk_tree_view_column_set_resizable(column, TRUE);
+    gtk_tree_view_column_set_sort_column_id(column, COLUMN_GPU);
+    gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(list_store), COLUMN_GPU, compare_int_list_item, (void *)COLUMN_GPU, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
     column = gtk_tree_view_column_new_with_attributes(_("RSS"), cell_renderer, "text", COLUMN_RSS, NULL);
@@ -467,6 +473,8 @@ void fill_list_item(guint i, GtkTreeIter *iter)
         gtk_tree_store_set(GTK_TREE_STORE(list_store), iter, COLUMN_TIME, buf, -1);
         sprintf(buf,"%d",task->prio);
         gtk_tree_store_set(GTK_TREE_STORE(list_store), iter, COLUMN_PRIO, buf, -1);    /* my change */
+        sprintf(buf,"%d%%",0);
+        gtk_tree_store_set(GTK_TREE_STORE(list_store), iter, COLUMN_GPU, buf, -1);    /* my change */
     }
 }
 

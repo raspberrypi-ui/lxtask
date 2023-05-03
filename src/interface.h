@@ -52,6 +52,7 @@ enum {
     COLUMN_NAME = 0,
     COLUMN_UNAME,
     COLUMN_TIME,
+    COLUMN_GPU,
     COLUMN_RSS,
     COLUMN_MEM,
     COLUMN_PID,
