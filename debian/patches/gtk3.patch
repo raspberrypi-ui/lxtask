@@ -1,0 +1,13 @@
+diff --git a/configure.ac b/configure.ac
+index dc12d63..82cab0c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -25,7 +25,7 @@ AC_ARG_ENABLE(gtk3,
+ [case "${enableval}" in
+   yes)  enable_gtk3=yes ;;
+   *)   enable_gtk3=no ;;
+-esac],[])
++esac],[enable_gtk3=yes])
+ 
+ echo "x$enable_gtk3"
+ if test "x$enable_gtk3" = "xyes" ; then
