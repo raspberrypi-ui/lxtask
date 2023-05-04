@@ -39,6 +39,7 @@ struct task
     gint old_time;
     gfloat time_percentage;
     gint prio;  /* my change */
+    gfloat gpu_percentage;
 };
 
 typedef struct
@@ -56,6 +57,21 @@ typedef struct
     guint64 cpu_old_used;
     gboolean valid_proc_reading;
 } system_status;
+
+typedef struct
+{
+    guint pid;
+    unsigned long last_bin;
+    unsigned long last_render;
+    unsigned long last_tfu;
+    unsigned long last_csd;
+    unsigned long last_cache;
+    float bin;
+    float render;
+    float tfu;
+    float csd;
+    float cache_clean;
+} gpu_status;
 
 extern GtkWidget *main_window;
 

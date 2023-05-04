@@ -473,8 +473,8 @@ void fill_list_item(guint i, GtkTreeIter *iter)
         gtk_tree_store_set(GTK_TREE_STORE(list_store), iter, COLUMN_TIME, buf, -1);
         sprintf(buf,"%d",task->prio);
         gtk_tree_store_set(GTK_TREE_STORE(list_store), iter, COLUMN_PRIO, buf, -1);    /* my change */
-        sprintf(buf,"%d%%",0);
-        gtk_tree_store_set(GTK_TREE_STORE(list_store), iter, COLUMN_GPU, buf, -1);    /* my change */
+        sprintf (buf,"%d%%", (guint) task->gpu_percentage);
+        gtk_tree_store_set (GTK_TREE_STORE (list_store), iter, COLUMN_GPU, buf, -1);
     }
 }
 

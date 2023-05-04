@@ -35,6 +35,132 @@ extern gint refresh_interval;
 
 static system_status *sys_stat =NULL;
 
+static GList *gpu_stats = NULL;
+
+void read_gpu_status (void)
+{
+    char *buf = NULL;
+    size_t res = 0;
+    char queue[16];
+    long pid, jobs, runtime, active, ts, timestamp;
+    GList *lptr;
+    gpu_status *gpu_data;
+    static long last_timestamp;
+    long int elapsed;
+    guint i;
+    float max;
+
+    // open the stats file
+    FILE *fp = fopen ("/sys/kernel/debug/dri/0/gpu_pid_usage", "rb");
+    if (fp == NULL) return;
+
+    // read the stats file a line at a time
+    while (getline (&buf, &res, fp) > 0)
+    {
+        if (sscanf (buf, "timestamp;%ld;", &ts) == 1)
+        {
+            // use the timestamp line to calculate time since last measurement
+            timestamp = ts;
+            elapsed = timestamp - last_timestamp;
+            last_timestamp = timestamp;
+        }
+        else if (sscanf (strchr (buf, ';'), ";%ld;%ld;%ld;%ld;", &pid, &jobs, &runtime, &active) == 4)
+        {
+            // if a PID line is found, check to see if it is already in the list...
+            for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
+            {
+                gpu_data = (gpu_status *) lptr->data;
+                if (gpu_data->pid == pid) break;
+            }
+
+            // ... and add an entry to the list if it is not
+            if (gpu_data->pid != pid)
+            {
+                gpu_data = malloc (sizeof (gpu_status));
+                gpu_data->pid = pid;
+                gpu_data->bin = 0.0;
+                gpu_data->render = 0.0;
+                gpu_data->tfu = 0.0;
+                gpu_data->csd = 0.0;
+                gpu_data->cache_clean = 0.0;
+                gpu_data->last_bin = 0;
+                gpu_data->last_render = 0;
+                gpu_data->last_tfu = 0;
+                gpu_data->last_csd = 0;
+                gpu_data->last_cache = 0;
+                gpu_stats = g_list_append (gpu_stats, gpu_data);
+            }
+            else
+            {
+                // depending on which queue is in the line, calculate the percentage of time used since last measurement
+                // store the current time value for the next calculation
+                if (!strncmp (buf, "v3d_bin", 7))
+                {
+                    gpu_data->bin = runtime;
+                    gpu_data->bin -= gpu_data->last_bin;
+                    gpu_data->bin /= elapsed;
+                    gpu_data->last_bin = runtime;
+                }
+                if (!strncmp (buf, "v3d_ren", 7))
+                {
+                    gpu_data->render = runtime;
+                    gpu_data->render -= gpu_data->last_render;
+                    gpu_data->render /= elapsed;
+                    gpu_data->last_render = runtime;
+                }
+                if (!strncmp (buf, "v3d_tfu", 7))
+                {
+                    gpu_data->tfu = runtime;
+                    gpu_data->tfu -= gpu_data->last_tfu;
+                    gpu_data->tfu /= elapsed;
+                    gpu_data->last_tfu = runtime;
+                }
+                if (!strncmp (buf, "v3d_csd", 7))
+                {
+                    gpu_data->csd = runtime;
+                    gpu_data->csd -= gpu_data->last_csd;
+                    gpu_data->csd /= elapsed;
+                    gpu_data->last_csd = runtime;
+                }
+                if (!strncmp (buf, "v3d_cac", 7))
+                {
+                    gpu_data->cache_clean = runtime;
+                    gpu_data->cache_clean -= gpu_data->last_cache;
+                    gpu_data->cache_clean /= elapsed;
+                    gpu_data->last_cache = runtime;
+                }
+            }
+        }
+    }
+
+    // list is now filled with calculated loadings for each queue for each PID
+    free (buf);
+    fclose (fp);
+
+    // loop through tasks...
+    for (i = 0; i < task_array->len; i++)
+    {
+        struct task *tmp = &g_array_index (task_array, struct task, i);
+
+        // for each task, loop through the list of GPU stats looking for its PID
+        for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
+        {
+            gpu_data = (gpu_status *) lptr->data;
+            if (gpu_data->pid == tmp->pid)
+            {
+                // if the PID matches, calculate the max of the five queue values and store in the task array
+                max = 0;
+                if (gpu_data->render > max) max = gpu_data->render;
+                if (gpu_data->bin > max) max = gpu_data->bin;
+                if (gpu_data->csd > max) max = gpu_data->csd;
+                if (gpu_data->tfu > max) max = gpu_data->tfu;
+                if (gpu_data->cache_clean > max) max = gpu_data->cache_clean;
+                tmp->gpu_percentage = max * 100.0;
+            }
+        }
+    }
+}
+
 gboolean refresh_task_list(void)
 {
     guint i, j;
@@ -51,6 +177,8 @@ gboolean refresh_task_list(void)
 
     /* gets the new task list */
     new_task_list = (GArray*) get_task_list();
+
+    read_gpu_status ();
 
     /* check if task is new and marks the task that its checked*/
     for(i = 0; i < task_array->len; i++)
