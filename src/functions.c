@@ -47,7 +47,7 @@ void read_gpu_status (void)
     gpu_status *gpu_data;
     static long last_timestamp;
     long int elapsed;
-    guint i;
+    guint i, j;
     float max;
 
     // open the stats file
@@ -78,56 +78,30 @@ void read_gpu_status (void)
             {
                 gpu_data = malloc (sizeof (gpu_status));
                 gpu_data->pid = pid;
-                gpu_data->bin = 0.0;
-                gpu_data->render = 0.0;
-                gpu_data->tfu = 0.0;
-                gpu_data->csd = 0.0;
-                gpu_data->cache_clean = 0.0;
-                gpu_data->last_bin = 0;
-                gpu_data->last_render = 0;
-                gpu_data->last_tfu = 0;
-                gpu_data->last_csd = 0;
-                gpu_data->last_cache = 0;
+                for (i = 0; i < 5; i++)
+                {
+                    gpu_data->load[i] = 0.0;
+                    gpu_data->last_val[i] = 0;
+                }
                 gpu_stats = g_list_append (gpu_stats, gpu_data);
             }
             else
             {
                 // depending on which queue is in the line, calculate the percentage of time used since last measurement
                 // store the current time value for the next calculation
-                if (!strncmp (buf, "v3d_bin", 7))
+                i = -1;
+                if (!strncmp (buf, "v3d_bin", 7)) i = 0;
+                if (!strncmp (buf, "v3d_ren", 7)) i = 1;
+                if (!strncmp (buf, "v3d_tfu", 7)) i = 2;
+                if (!strncmp (buf, "v3d_csd", 7)) i = 3;
+                if (!strncmp (buf, "v3d_cac", 7)) i = 4;
+
+                if (i != -1)
                 {
-                    gpu_data->bin = runtime;
-                    gpu_data->bin -= gpu_data->last_bin;
-                    gpu_data->bin /= elapsed;
-                    gpu_data->last_bin = runtime;
-                }
-                if (!strncmp (buf, "v3d_ren", 7))
-                {
-                    gpu_data->render = runtime;
-                    gpu_data->render -= gpu_data->last_render;
-                    gpu_data->render /= elapsed;
-                    gpu_data->last_render = runtime;
-                }
-                if (!strncmp (buf, "v3d_tfu", 7))
-                {
-                    gpu_data->tfu = runtime;
-                    gpu_data->tfu -= gpu_data->last_tfu;
-                    gpu_data->tfu /= elapsed;
-                    gpu_data->last_tfu = runtime;
-                }
-                if (!strncmp (buf, "v3d_csd", 7))
-                {
-                    gpu_data->csd = runtime;
-                    gpu_data->csd -= gpu_data->last_csd;
-                    gpu_data->csd /= elapsed;
-                    gpu_data->last_csd = runtime;
-                }
-                if (!strncmp (buf, "v3d_cac", 7))
-                {
-                    gpu_data->cache_clean = runtime;
-                    gpu_data->cache_clean -= gpu_data->last_cache;
-                    gpu_data->cache_clean /= elapsed;
-                    gpu_data->last_cache = runtime;
+                    gpu_data->load[i] = runtime;
+                    gpu_data->load[i] -= gpu_data->last_val[i];
+                    gpu_data->load[i] /= elapsed;
+                    gpu_data->last_val[i] = runtime;
                 }
             }
         }
@@ -150,11 +124,9 @@ void read_gpu_status (void)
             {
                 // if the PID matches, calculate the max of the five queue values and store in the task array
                 max = 0;
-                if (gpu_data->render > max) max = gpu_data->render;
-                if (gpu_data->bin > max) max = gpu_data->bin;
-                if (gpu_data->csd > max) max = gpu_data->csd;
-                if (gpu_data->tfu > max) max = gpu_data->tfu;
-                if (gpu_data->cache_clean > max) max = gpu_data->cache_clean;
+                for (j = 0; j < 5; j++)
+                    if (gpu_data->load[j] > max)
+                        max = gpu_data->load[j];
                 tmp->gpu_percentage = max * 100.0;
             }
         }

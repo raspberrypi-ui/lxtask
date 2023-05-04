@@ -61,16 +61,8 @@ typedef struct
 typedef struct
 {
     guint pid;
-    unsigned long last_bin;
-    unsigned long last_render;
-    unsigned long last_tfu;
-    unsigned long last_csd;
-    unsigned long last_cache;
-    float bin;
-    float render;
-    float tfu;
-    float csd;
-    float cache_clean;
+    float load[5];
+    unsigned long last_val[5];
 } gpu_status;
 
 extern GtkWidget *main_window;
