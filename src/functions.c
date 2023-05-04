@@ -41,13 +41,11 @@ void read_gpu_status (void)
 {
     char *buf = NULL;
     size_t res = 0;
-    char queue[16];
-    long pid, jobs, runtime, active, ts, timestamp;
+    unsigned long pid, jobs, runtime, active, ts, timestamp, elapsed;
+    static unsigned long last_timestamp;
     GList *lptr;
     gpu_status *gpu_data;
-    static long last_timestamp;
-    long int elapsed;
-    guint i, j;
+    int i, j;
     float max;
 
     // open the stats file
