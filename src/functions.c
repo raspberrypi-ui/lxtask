@@ -83,24 +83,22 @@ void read_gpu_status (void)
                 }
                 gpu_stats = g_list_append (gpu_stats, gpu_data);
             }
-            else
-            {
-                // depending on which queue is in the line, calculate the percentage of time used since last measurement
-                // store the current time value for the next calculation
-                i = -1;
-                if (!strncmp (buf, "v3d_bin", 7)) i = 0;
-                if (!strncmp (buf, "v3d_ren", 7)) i = 1;
-                if (!strncmp (buf, "v3d_tfu", 7)) i = 2;
-                if (!strncmp (buf, "v3d_csd", 7)) i = 3;
-                if (!strncmp (buf, "v3d_cac", 7)) i = 4;
 
-                if (i != -1)
-                {
-                    gpu_data->load[i] = runtime;
-                    gpu_data->load[i] -= gpu_data->last_val[i];
-                    gpu_data->load[i] /= elapsed;
-                    gpu_data->last_val[i] = runtime;
-                }
+            // depending on which queue is in the line, calculate the percentage of time used since last measurement
+            // store the current time value for the next calculation
+            i = -1;
+            if (!strncmp (buf, "v3d_bin", 7)) i = 0;
+            if (!strncmp (buf, "v3d_ren", 7)) i = 1;
+            if (!strncmp (buf, "v3d_tfu", 7)) i = 2;
+            if (!strncmp (buf, "v3d_csd", 7)) i = 3;
+            if (!strncmp (buf, "v3d_cac", 7)) i = 4;
+
+            if (i != -1)
+            {
+                gpu_data->load[i] = runtime;
+                gpu_data->load[i] -= gpu_data->last_val[i];
+                gpu_data->load[i] /= elapsed;
+                gpu_data->last_val[i] = runtime;
             }
         }
     }
