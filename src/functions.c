@@ -32,6 +32,7 @@
 #include "functions.h"
 
 extern gint refresh_interval;
+extern gboolean show_gpu;
 
 static system_status *sys_stat =NULL;
 
@@ -212,7 +213,7 @@ gboolean refresh_task_list(void)
     /* gets the new task list */
     new_task_list = (GArray*) get_task_list();
 
-    read_gpu_status ();
+    if (show_gpu) read_gpu_status ();
 
     /* check if task is new and marks the task that its checked*/
     for(i = 0; i < task_array->len; i++)
@@ -324,12 +325,15 @@ gboolean refresh_task_list(void)
         gtk_progress_bar_set_text (GTK_PROGRESS_BAR (cpu_usage_progress_bar), tooltip);
     }
 
-    gpu_usage = get_gpu_usage ();
-    sprintf (tooltip,_("GPU usage: %0.0f %%"), gpu_usage * 100.0);
-    if(strcmp(tooltip,gtk_progress_bar_get_text(GTK_PROGRESS_BAR(gpu_usage_progress_bar))))
+    if (show_gpu)
     {
-        gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (gpu_usage_progress_bar), gpu_usage);
-        gtk_progress_bar_set_text (GTK_PROGRESS_BAR (gpu_usage_progress_bar), tooltip);
+        gpu_usage = get_gpu_usage ();
+        sprintf (tooltip,_("GPU usage: %0.0f %%"), gpu_usage * 100.0);
+        if(strcmp(tooltip,gtk_progress_bar_get_text(GTK_PROGRESS_BAR(gpu_usage_progress_bar))))
+        {
+            gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (gpu_usage_progress_bar), gpu_usage);
+            gtk_progress_bar_set_text (GTK_PROGRESS_BAR (gpu_usage_progress_bar), tooltip);
+        }
     }
     return TRUE;
 }

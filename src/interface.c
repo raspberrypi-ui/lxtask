@@ -51,6 +51,7 @@ void show_preferences(void);
 extern gint refresh_interval;
 extern guint rID;
 GtkWidget *refresh_spin;
+gboolean show_gpu = FALSE;
 
 GtkWidget* create_main_window (void)
 {
@@ -64,6 +65,13 @@ GtkWidget* create_main_window (void)
     GtkWidget *button3;
 
     GtkWidget *system_info_box;
+
+    FILE *fp = fopen ("/sys/kernel/debug/dri/0/gpu_usage", "rb");
+    if (fp)
+    {
+        show_gpu = TRUE;
+        fclose (fp);
+    }
 
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (window), _("Task Manager"));
@@ -141,16 +149,19 @@ GtkWidget* create_main_window (void)
     gtk_container_add (GTK_CONTAINER (cpu_usage_progress_bar_box), cpu_usage_progress_bar);
     gtk_box_pack_start (GTK_BOX (system_info_box), cpu_usage_progress_bar_box, TRUE, TRUE, 0);
 
-    gpu_usage_progress_bar_box = gtk_event_box_new ();
-    gpu_usage_progress_bar = gtk_progress_bar_new ();
+    if (show_gpu)
+    {
+        gpu_usage_progress_bar_box = gtk_event_box_new ();
+        gpu_usage_progress_bar = gtk_progress_bar_new ();
 #if GTK_CHECK_VERSION(3,0,0)
-    gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (gpu_usage_progress_bar), TRUE);
+        gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (gpu_usage_progress_bar), TRUE);
 #endif
-    gtk_progress_bar_set_text (GTK_PROGRESS_BAR (gpu_usage_progress_bar), _("gpu usage"));
-    gtk_widget_show (gpu_usage_progress_bar);
-    gtk_widget_show (gpu_usage_progress_bar_box);
-    gtk_container_add (GTK_CONTAINER (gpu_usage_progress_bar_box), gpu_usage_progress_bar);
-    gtk_box_pack_start (GTK_BOX (system_info_box), gpu_usage_progress_bar_box, TRUE, TRUE, 0);
+        gtk_progress_bar_set_text (GTK_PROGRESS_BAR (gpu_usage_progress_bar), _("gpu usage"));
+        gtk_widget_show (gpu_usage_progress_bar);
+        gtk_widget_show (gpu_usage_progress_bar_box);
+        gtk_container_add (GTK_CONTAINER (gpu_usage_progress_bar_box), gpu_usage_progress_bar);
+        gtk_box_pack_start (GTK_BOX (system_info_box), gpu_usage_progress_bar_box, TRUE, TRUE, 0);
+    }
 
     mem_usage_progress_bar_box = gtk_event_box_new ();
     mem_usage_progress_bar = gtk_progress_bar_new ();
@@ -232,11 +243,14 @@ void create_list_store(void)
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(list_store), COLUMN_TIME, compare_int_list_item, (void *)COLUMN_TIME, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
-    column = gtk_tree_view_column_new_with_attributes(_("GPU%"), cell_renderer, "text", COLUMN_GPU, NULL);
-    gtk_tree_view_column_set_resizable(column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, COLUMN_GPU);
-    gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(list_store), COLUMN_GPU, compare_int_list_item, (void *)COLUMN_GPU, NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    if (show_gpu)
+    {
+        column = gtk_tree_view_column_new_with_attributes(_("GPU%"), cell_renderer, "text", COLUMN_GPU, NULL);
+        gtk_tree_view_column_set_resizable(column, TRUE);
+        gtk_tree_view_column_set_sort_column_id(column, COLUMN_GPU);
+        gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(list_store), COLUMN_GPU, compare_int_list_item, (void *)COLUMN_GPU, NULL);
+        gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    }
 
     column = gtk_tree_view_column_new_with_attributes(_("RSS"), cell_renderer, "text", COLUMN_RSS, NULL);
     gtk_tree_view_column_set_resizable(column, TRUE);
