@@ -95,9 +95,13 @@ void read_gpu_status (void)
 
             if (i != -1)
             {
-                gpu_data->load[i] = runtime;
-                gpu_data->load[i] -= gpu_data->last_val[i];
-                gpu_data->load[i] /= elapsed;
+                if (gpu_data->last_val[i] == 0) gpu_data->load[i] = 0.0;
+                else
+                {
+                    gpu_data->load[i] = runtime;
+                    gpu_data->load[i] -= gpu_data->last_val[i];
+                    gpu_data->load[i] /= elapsed;
+                }
                 gpu_data->last_val[i] = runtime;
             }
         }
@@ -111,6 +115,7 @@ void read_gpu_status (void)
     for (i = 0; i < task_array->len; i++)
     {
         struct task *tmp = &g_array_index (task_array, struct task, i);
+        tmp->gpu_percentage = 0;
 
         // for each task, loop through the list of GPU stats looking for its PID
         for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
@@ -119,7 +124,7 @@ void read_gpu_status (void)
             if (gpu_data->pid == tmp->pid)
             {
                 // if the PID matches, calculate the max of the five queue values and store in the task array
-                max = 0;
+                max = 0.0;
                 for (j = 0; j < 5; j++)
                     if (gpu_data->load[j] > max)
                         max = gpu_data->load[j];
