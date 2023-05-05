@@ -94,7 +94,7 @@ msgstr "memory usage"
 
 #: ../src/interface.c:163
 msgid "more details"
-msgstr "more details"
+msgstr "More Details"
 
 #: ../src/interface.c:189
 msgid "Command"
