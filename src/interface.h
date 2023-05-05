@@ -44,8 +44,10 @@ extern GtkWidget *treeview;
 extern GtkWidget *mainmenu;
 extern GtkWidget *taskpopup;
 extern GtkWidget *cpu_usage_progress_bar;
+extern GtkWidget *gpu_usage_progress_bar;
 extern GtkWidget *mem_usage_progress_bar;
 extern GtkWidget *cpu_usage_progress_bar_box;
+extern GtkWidget *gpu_usage_progress_bar_box;
 extern GtkWidget *mem_usage_progress_bar_box;
 
 enum {

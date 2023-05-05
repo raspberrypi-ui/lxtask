@@ -32,8 +32,10 @@ GtkWidget *treeview;
 GtkWidget *mainmenu;
 GtkWidget *taskpopup;
 GtkWidget *cpu_usage_progress_bar;
+GtkWidget *gpu_usage_progress_bar;
 GtkWidget *mem_usage_progress_bar;
 GtkWidget *cpu_usage_progress_bar_box;
+GtkWidget *gpu_usage_progress_bar_box;
 GtkWidget *mem_usage_progress_bar_box;
 
 GtkTreeViewColumn *column;
@@ -138,6 +140,17 @@ GtkWidget* create_main_window (void)
     gtk_widget_show (cpu_usage_progress_bar_box);
     gtk_container_add (GTK_CONTAINER (cpu_usage_progress_bar_box), cpu_usage_progress_bar);
     gtk_box_pack_start (GTK_BOX (system_info_box), cpu_usage_progress_bar_box, TRUE, TRUE, 0);
+
+    gpu_usage_progress_bar_box = gtk_event_box_new ();
+    gpu_usage_progress_bar = gtk_progress_bar_new ();
+#if GTK_CHECK_VERSION(3,0,0)
+    gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (gpu_usage_progress_bar), TRUE);
+#endif
+    gtk_progress_bar_set_text (GTK_PROGRESS_BAR (gpu_usage_progress_bar), _("gpu usage"));
+    gtk_widget_show (gpu_usage_progress_bar);
+    gtk_widget_show (gpu_usage_progress_bar_box);
+    gtk_container_add (GTK_CONTAINER (gpu_usage_progress_bar_box), gpu_usage_progress_bar);
+    gtk_box_pack_start (GTK_BOX (system_info_box), gpu_usage_progress_bar_box, TRUE, TRUE, 0);
 
     mem_usage_progress_bar_box = gtk_event_box_new ();
     mem_usage_progress_bar = gtk_progress_bar_new ();
