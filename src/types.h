@@ -63,6 +63,7 @@ typedef struct
     guint pid;
     float load[5];
     unsigned long last_val[5];
+    gboolean active;
 } gpu_status;
 
 extern GtkWidget *main_window;

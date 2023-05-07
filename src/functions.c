@@ -105,7 +105,25 @@ void read_gpu_status (void)
                 }
                 gpu_data->last_val[i] = runtime;
             }
+
+            gpu_data->active = TRUE;
         }
+    }
+
+    // clear old values for any pids which did not get updated this time
+    for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
+    {
+        gpu_data = (gpu_status *) lptr->data;
+
+        if (!gpu_data->active)
+        {
+            for (i = 0; i < 5; i++)
+            {
+                gpu_data->load[i] = 0.0;
+                gpu_data->last_val[i] = 0;
+            }
+        }
+        gpu_data->active = FALSE;
     }
 
     // list is now filled with calculated loadings for each queue for each PID
@@ -122,6 +140,7 @@ void read_gpu_status (void)
         for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
         {
             gpu_data = (gpu_status *) lptr->data;
+
             if (gpu_data->pid == tmp->pid)
             {
                 // if the PID matches, calculate the max of the five queue values and store in the task array
