@@ -134,7 +134,7 @@ void read_gpu_status (void)
     for (i = 0; i < task_array->len; i++)
     {
         struct task *tmp = &g_array_index (task_array, struct task, i);
-        tmp->gpu_percentage = 0;
+        tmp->gpu_percentage = 0.0;
 
         // for each task, loop through the list of GPU stats looking for its PID
         for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
