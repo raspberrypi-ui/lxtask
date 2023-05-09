@@ -74,9 +74,7 @@ int main (int argc, char *argv[])
     gtk_init (&argc, &argv);
 
     page_size=sysconf(_SC_PAGESIZE)>>10;
-    char *uid = getenv ("SUDO_UID");
-    if (!uid) own_uid = getuid();
-    else sscanf (uid, "%d", &own_uid);
+    own_uid = getuid();
 
     config_file = g_build_filename(g_get_user_config_dir(), "lxtask.conf", NULL);
     load_config();
