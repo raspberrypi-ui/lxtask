@@ -158,26 +158,27 @@ float get_gpu_usage (void)
 {
     char *buf = NULL;
     size_t res = 0;
-    unsigned long jobs, runtime, active, ts, timestamp, elapsed;
-    static unsigned long last_timestamp, last_val[5] = {0, 0, 0, 0, 0};
+    unsigned long jobs, active;
+    unsigned long long timestamp, elapsed, runtime;
+    static unsigned long long last_timestamp, last_val[5] = {0, 0, 0, 0, 0};
     float max, load[5];
     int i;
 
     // open the stats file
     FILE *fp = fopen ("/sys/kernel/debug/dri/0/gpu_usage", "rb");
+    if (fp == NULL) fp = fopen ("/sys/kernel/debug/dri/1/gpu_usage", "rb");
     if (fp == NULL) return 0.0;
 
     // read the stats file a line at a time
     while (getline (&buf, &res, fp) > 0)
     {
-        if (sscanf (buf, "timestamp;%ld;", &ts) == 1)
+        if (sscanf (buf, "timestamp;%lld;", &timestamp) == 1)
         {
             // use the timestamp line to calculate time since last measurement
-            timestamp = ts;
             elapsed = timestamp - last_timestamp;
             last_timestamp = timestamp;
         }
-        else if (sscanf (strchr (buf, ';'), ";%ld;%ld;%ld;", &jobs, &runtime, &active) == 3)
+        else if (sscanf (strchr (buf, ';'), ";%ld;%lld;%ld;", &jobs, &runtime, &active) == 3)
         {
             // depending on which queue is in the line, calculate the percentage of time used since last measurement
             // store the current time value for the next calculation
