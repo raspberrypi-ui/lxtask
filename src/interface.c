@@ -67,6 +67,7 @@ GtkWidget* create_main_window (void)
     GtkWidget *system_info_box;
 
     FILE *fp = fopen ("/sys/kernel/debug/dri/0/gpu_usage", "rb");
+    if (fp == NULL) fp = fopen ("/sys/kernel/debug/dri/1/gpu_usage", "rb");
     if (fp)
     {
         show_gpu = TRUE;
