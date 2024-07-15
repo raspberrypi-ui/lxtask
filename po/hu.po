@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: lxtask\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-09-26 01:30+0300\n"
-"PO-Revision-Date: 2015-05-04 16:43+0000\n"
-"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
+"PO-Revision-Date: 2024-06-26 16:49+0200\n"
+"Last-Translator: Dr. Hornos Tamás <tom.hornos@gmail.com>\n"
 "Language-Team: Hungarian <hu@li.org>\n"
-"Language: templates\n"
+"Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Pootle 2.7\n"
+"X-Generator: Poedit 3.4.4\n"
 "X-POOTLE-MTIME: 1439775046.447069\n"
 
 #: ../lxtask.desktop.in.h:1 ../src/interface.c:55
@@ -33,7 +33,7 @@ msgstr "Folyamatkezelő"
 
 #: ../data/lxtask.desktop.in.h:4
 msgid "task;kill;suspend;processor;memory;monitoring;performance;"
-msgstr "feladat;kilövés;készenlét;processzor;memória;megfigyelés;teljesítmény;"
+msgstr "feladat;kilövés;felfüggesztés;processzor;memória;megfigyelés;teljesítmény;"
 
 #: ../src/xfce-taskmanager-linux.c:285
 #, c-format
@@ -42,15 +42,14 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
-"Nem lehet %d szignált küldeni a következő azonosítójú feladatra: %d\n"
+"Nem lehet %d szignált küldeni a %d azonosítójú feladatra\n"
 "\n"
 "%s"
 
 #: ../src/xfce-taskmanager-linux.c:299
 #, c-format
 msgid "Couldn't set priority %d to the task with ID %d"
-msgstr ""
-"Nem lehet %d prioritást beállítani a következő azonosítójú feladatra: %d"
+msgstr "Nem lehet %d prioritást beállítani a %d azonosítójú feladatra"
 
 #: ../src/callbacks.c:58
 msgid "Really kill the task?"
@@ -62,17 +61,22 @@ msgstr "Valóban leállítod a feladatot?"
 
 #: ../src/callbacks.c:86
 msgid "Can't stop process self"
-msgstr "Nem lehet a folyamatot magát leállítani"
+msgstr "A Feladatkezelő saját magát nem állíthatja meg"
 
 #: ../src/functions.c:148
 #, c-format
 msgid "Memory: %d MB of %d MB used"
-msgstr "Memória: %d MB/%d MB használt"
+msgstr "Memória: %d MB hasznát %d MB-ból"
 
 #: ../src/functions.c:156
 #, c-format
 msgid "CPU usage: %0.0f %%"
-msgstr "CPU-használat: %0.0f %%"
+msgstr "Processzor: %0.0f %%"
+
+#: ../src/functions.c:325
+#, c-format
+msgid "GPU usage: %0.0f %%"
+msgstr "Grafikus kártya: %0.0f %%"
 
 #: ../src/interface.c:70
 msgid "_File"
@@ -88,15 +92,15 @@ msgstr "_Súgó"
 
 #: ../src/interface.c:124
 msgid "cpu usage"
-msgstr "cpu-használat"
+msgstr "processzor használat"
 
 #: ../src/interface.c:135
 msgid "memory usage"
-msgstr "memóriahasználat"
+msgstr "memória használat"
 
 #: ../src/interface.c:163
 msgid "more details"
-msgstr "részletek"
+msgstr "több részlet"
 
 #: ../src/interface.c:189
 msgid "Command"
@@ -116,7 +120,7 @@ msgstr "RSS"
 
 #: ../src/interface.c:216
 msgid "VM-Size"
-msgstr "VM-méret"
+msgstr "VM méret"
 
 #: ../src/interface.c:222
 msgid "PID"
@@ -148,7 +152,7 @@ msgstr "Leállítás"
 
 #: ../src/interface.c:271
 msgid "Kill"
-msgstr "Kényszerített leállítás"
+msgstr "Kilövés"
 
 #: ../src/interface.c:276
 msgid "Priority"
@@ -181,7 +185,7 @@ msgstr "   10"
 # Ebben a szövegkörnyezetben a folyamat elnevezés egyértelműbb, ezért ez használandó.
 #: ../src/interface.c:335
 msgid "Show user tasks"
-msgstr "Felhasználói folyamatok megjelenítése"
+msgstr "Felhasználói folyamatok"
 
 # Igaz, hogy:
 # tasks > feladatok ÉS
@@ -190,7 +194,7 @@ msgstr "Felhasználói folyamatok megjelenítése"
 # Ebben a szövegkörnyezetben a folyamat elnevezés egyértelműbb, ezért ez használandó.
 #: ../src/interface.c:340
 msgid "Show root tasks"
-msgstr "Root folyamatok megjelenítése"
+msgstr "Root folyamatok"
 
 # Igaz, hogy:
 # tasks > feladatok ÉS
@@ -199,22 +203,22 @@ msgstr "Root folyamatok megjelenítése"
 # Ebben a szövegkörnyezetben a folyamat elnevezés egyértelműbb, ezért ez használandó.
 #: ../src/interface.c:345
 msgid "Show other tasks"
-msgstr "Egyéb folyamatok megjelenítése"
+msgstr "Egyéb folyamatok"
 
 #: ../src/interface.c:350
 msgid "Show full cmdline"
-msgstr "Teljes cmdline megjelenítése"
+msgstr "Teljes parancssor"
 
 #: ../src/interface.c:355
 msgid "Show memory used by cache as free"
-msgstr "A gyorsítótár által használt memória megjelenítése szabadként"
+msgstr "Gyorsítótár megjelenítése szabadként"
 
 #: ../src/interface.c:387
 msgid ""
 "LXTask is derived from Xfce4 Task Manager by:\n"
 "  * Johannes Zellner <webmaster@nebulon.de>"
 msgstr ""
-"Az LXTask az Xfce4 feladatkezelőből lett kifejlesztve.\n"
+"Az LXTask az Xfce4 feladatkezelőből származik.\n"
 "Eredeti készítő: Johannes Zellner <webmaster@nebulon.de>"
 
 #. TRANSLATORS: Replace this string with your names, one name per line.
@@ -223,7 +227,8 @@ msgid "translator-credits"
 msgstr ""
 "Dvornik László <dvornik@gnome.hu>\n"
 "Szervác Attila <sas@321.hu>\n"
-"Gyönki Bendegúz <gyeben@gyeben.tk>"
+"Gyönki Bendegúz <gyeben@gyeben.tk>\n"
+"Dr. Hornos Tamás <tom.hornos@gmail.com>"
 
 #: ../src/interface.c:401 ../src/interface.c:403
 msgid "LXTask"
@@ -236,7 +241,7 @@ msgstr "Copyright (C) 2008 LXDE csapat"
 
 #: ../src/interface.c:407
 msgid "Lightweight task manager for LXDE project"
-msgstr "Pehelysúlyú feladatkezelő az LXDE projekthez"
+msgstr "Pehelysúlyú LXDE feladatkezelő"
 
 #: ../src/interface.c:635
 msgid "Preferences"
@@ -248,7 +253,7 @@ msgstr "Általános"
 
 #: ../src/interface.c:640
 msgid "Refresh rate (seconds):"
-msgstr "Frissítési gyakoriság (másodperc):"
+msgstr "Frissítési gyakoriság (mp):"
 
 #: ../src/utils.c:43
 msgid "Error"
