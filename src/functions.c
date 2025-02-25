@@ -74,7 +74,7 @@ void read_gpu_status (void)
             }
 
             // ... and add an entry to the list if it is not
-            if (gpu_data->pid != pid)
+            if (lptr == NULL)
             {
                 gpu_data = malloc (sizeof (gpu_status));
                 gpu_data->pid = pid;
