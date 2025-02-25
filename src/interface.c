@@ -51,7 +51,7 @@ void show_preferences(void);
 extern gint refresh_interval;
 extern guint rID;
 GtkWidget *refresh_spin;
-gboolean show_gpu = FALSE;
+int show_gpu = 0;
 
 GtkWidget* create_main_window (void)
 {
@@ -70,7 +70,13 @@ GtkWidget* create_main_window (void)
     if (fp == NULL) fp = fopen ("/sys/kernel/debug/dri/1/gpu_usage", "rb");
     if (fp)
     {
-        show_gpu = TRUE;
+        show_gpu = 1;
+        fclose (fp);
+    }
+    fp = fopen ("/sys/devices/platform/axi/1002000000.v3d/gpu_stats", "rb");
+    if (fp)
+    {
+        show_gpu = 2;
         fclose (fp);
     }
 
@@ -244,7 +250,7 @@ void create_list_store(void)
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(list_store), COLUMN_TIME, compare_int_list_item, (void *)COLUMN_TIME, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
-    if (show_gpu)
+    if (show_gpu == 1)
     {
         column = gtk_tree_view_column_new_with_attributes(_("GPU%"), cell_renderer, "text", COLUMN_GPU, NULL);
         gtk_tree_view_column_set_resizable(column, TRUE);

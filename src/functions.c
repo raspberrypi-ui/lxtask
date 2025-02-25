@@ -32,7 +32,7 @@
 #include "functions.h"
 
 extern gint refresh_interval;
-extern gboolean show_gpu;
+extern int show_gpu;
 
 static system_status *sys_stat =NULL;
 
@@ -51,7 +51,7 @@ void read_gpu_status (void)
 
     // open the stats file
     FILE *fp = fopen ("/sys/kernel/debug/dri/0/gpu_pid_usage", "rb");
-    if (fp == NULL) fp = fopen ("/sys/kernel/debug/dri/1/gpu_usage", "rb");
+    if (fp == NULL) fp = fopen ("/sys/kernel/debug/dri/1/gpu_pid_usage", "rb");
     if (fp == NULL) return;
 
     // read the stats file a line at a time
@@ -155,6 +155,71 @@ void read_gpu_status (void)
     }
 }
 
+static float get_gpu_usage_new (void)
+{
+    char *buf = NULL;
+    char type[16];
+    size_t res = 0;
+    unsigned long jobs;
+    unsigned long long timestamp, elapsed = 0, runtime;
+    static unsigned long long last_timestamp, last_val[5] = {0, 0, 0, 0, 0};
+    float max, load[5];
+    int i;
+
+    // open the stats file
+    FILE *fp = fopen ("/sys/devices/platform/axi/1002000000.v3d/gpu_stats", "rb");
+    if (fp == NULL) return -1.0;
+
+    // read the stats file a line at a time
+    while (getline (&buf, &res, fp) > 0)
+    {
+        if (sscanf (buf, "%s %lld %ld %lld", type, &timestamp, &jobs, &runtime) == 4)
+        {
+            // use the timestamp line to calculate time since last measurement
+            if (last_timestamp < timestamp)
+            {
+                elapsed = timestamp - last_timestamp;
+                last_timestamp = timestamp;
+            }
+
+            // depending on which queue is in the line, calculate the percentage of time used since last measurement
+            // store the current time value for the next calculation
+            i = -1;
+            if (!strncmp (type, "bin", 7)) i = 0;
+            if (!strncmp (type, "render", 7)) i = 1;
+            if (!strncmp (type, "tfu", 7)) i = 2;
+            if (!strncmp (type, "csd", 7)) i = 3;
+            if (!strncmp (type, "cache_clean", 7)) i = 4;
+            if (i != -1)
+            {
+                if (last_val[i] == 0) load[i] = 0.0;
+                else
+                {
+                    if (elapsed)
+                    {
+                        load[i] = runtime;
+                        load[i] -= last_val[i];
+                        load[i] /= elapsed;
+                    }
+                }
+                last_val[i] = runtime;
+            }
+        }
+    }
+
+    // list is now filled with calculated loadings for each queue for each PID
+    free (buf);
+    fclose (fp);
+
+    // calculate the max of the five queue values and store in the task array
+    max = 0.0;
+    for (i = 0; i < 5; i++)
+        if (load[i] > max)
+            max = load[i];
+
+    return max;
+}
+
 float get_gpu_usage (void)
 {
     char *buf = NULL;
@@ -234,7 +299,7 @@ gboolean refresh_task_list(void)
     /* gets the new task list */
     new_task_list = (GArray*) get_task_list();
 
-    if (show_gpu) read_gpu_status ();
+    if (show_gpu == 1) read_gpu_status ();
 
     /* check if task is new and marks the task that its checked*/
     for(i = 0; i < task_array->len; i++)
@@ -348,7 +413,8 @@ gboolean refresh_task_list(void)
 
     if (show_gpu)
     {
-        gpu_usage = get_gpu_usage ();
+        if (show_gpu == 2) gpu_usage = get_gpu_usage_new ();
+        else gpu_usage = get_gpu_usage ();
         sprintf (tooltip,_("GPU usage: %0.0f %%"), gpu_usage * 100.0);
         if(strcmp(tooltip,gtk_progress_bar_get_text(GTK_PROGRESS_BAR(gpu_usage_progress_bar))))
         {
