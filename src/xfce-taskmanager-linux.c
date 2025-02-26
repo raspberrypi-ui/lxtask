@@ -40,6 +40,7 @@ void get_task_details(pid_t pid,struct task *task)
 	task->pid=-1;
 	task->checked=FALSE;
 	task->size=0;
+	task->gpu_percentage = 0.0;
 
 	sprintf(line,"/proc/%d/statm",(int)pid);
         fd=open(line,O_RDONLY);
