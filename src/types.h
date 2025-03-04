@@ -66,6 +66,14 @@ typedef struct
     gboolean active;
 } gpu_status;
 
+typedef struct
+{
+    guint pid;
+    unsigned long long load[5];
+    unsigned long long last_val[5];
+    gboolean active;
+} gpu_status2;
+
 extern GtkWidget *main_window;
 
 extern GArray *task_array;

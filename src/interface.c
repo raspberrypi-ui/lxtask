@@ -250,7 +250,7 @@ void create_list_store(void)
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(list_store), COLUMN_TIME, compare_int_list_item, (void *)COLUMN_TIME, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
-    if (show_gpu == 1)
+    if (show_gpu)
     {
         column = gtk_tree_view_column_new_with_attributes(_("GPU%"), cell_renderer, "text", COLUMN_GPU, NULL);
         gtk_tree_view_column_set_resizable(column, TRUE);

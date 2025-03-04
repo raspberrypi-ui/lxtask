@@ -155,6 +155,116 @@ void read_gpu_status (void)
     }
 }
 
+void read_gpu_status_new (void)
+{
+    char *buf = NULL;
+    size_t res = 0;
+    GList *lptr;
+    gpu_status2 *gpu_data;
+    int i, j;
+    char queue[32];
+    int pid, fd;
+    unsigned long long runtime, max;
+
+    // clear the current cycle count for all existing pids
+    for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
+    {
+        gpu_data = (gpu_status2 *) lptr->data;
+
+        for (i = 0; i < 5; i++) gpu_data->load[i] = 0.0;
+        gpu_data->active = FALSE;
+    }
+
+    // grep the proc directories for GPU data
+    FILE *fp = popen ("grep -srI drm-engine /proc/*/fdinfo/*", "r");
+    if (fp == NULL) return;
+
+    // read the grepped data a line at a time
+    while (getline (&buf, &res, fp) > 0)
+    {
+        if (sscanf (buf, "/proc/%d/fdinfo/%d:%s %lld", &pid, &fd, queue, &runtime) == 4)
+        {
+            // if a PID line is found, check to see if it is already in the list...
+            for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
+            {
+                gpu_data = (gpu_status2 *) lptr->data;
+                if (gpu_data->pid == pid) break;
+            }
+
+            // ... and add an entry to the list if it is not
+            if (lptr == NULL)
+            {
+                gpu_data = malloc (sizeof (gpu_status2));
+                gpu_data->pid = pid;
+                for (i = 0; i < 5; i++)
+                {
+                    gpu_data->load[i] = 0.0;
+                    gpu_data->last_val[i] = 0;
+                }
+                gpu_stats = g_list_append (gpu_stats, gpu_data);
+            }
+
+            // depending on which queue is in the line, calculate the percentage of time used since last measurement
+            i = -1;
+            if (!strncmp (queue, "drm-engine-bin", 14)) i = 0;
+            if (!strncmp (queue, "drm-engine-ren", 14)) i = 1;
+            if (!strncmp (queue, "drm-engine-tfu", 14)) i = 2;
+            if (!strncmp (queue, "drm-engine-csd", 14)) i = 3;
+            if (!strncmp (queue, "drm-engine-cac", 14)) i = 4;
+
+            if (i != -1) gpu_data->load[i] += runtime;
+
+            gpu_data->active = TRUE;
+        }
+    }
+    fclose (fp);
+
+    // clear old values for any pids which did not get updated this time
+    for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
+    {
+        gpu_data = (gpu_status2 *) lptr->data;
+
+        if (!gpu_data->active)
+        {
+            for (i = 0; i < 5; i++)
+            {
+                gpu_data->load[i] = 0.0;
+                gpu_data->last_val[i] = 0;
+            }
+        }
+        gpu_data->active = FALSE;
+    }
+
+    // list is now filled with cycles for each queue for each PID
+
+    // loop through tasks...
+    for (i = 0; i < task_array->len; i++)
+    {
+        struct task *tmp = &g_array_index (task_array, struct task, i);
+        tmp->gpu_percentage = 0.0;
+
+        // for each task, loop through the list of GPU stats looking for its PID
+        for (lptr = gpu_stats; lptr != NULL; lptr = lptr->next)
+        {
+            gpu_data = (gpu_status2 *) lptr->data;
+
+            if (gpu_data->pid == tmp->pid)
+            {
+                // if the PID matches, calculate the max of the five queue values and store in the task array
+                max = 0.0;
+                for (j = 0; j < 5; j++)
+                {
+                    if (gpu_data->last_val[j] && gpu_data->load[j] - gpu_data->last_val[j] > max)
+                        max = gpu_data->load[j] - gpu_data->last_val[j];
+                    gpu_data->last_val[j] = gpu_data->load[j];
+                }
+                tmp->gpu_percentage = max / (refresh_interval * 10000000.0);
+            }
+        }
+    }
+}
+
+
 static float get_gpu_usage_new (void)
 {
     char *buf = NULL;
@@ -300,6 +410,7 @@ gboolean refresh_task_list(void)
     new_task_list = (GArray*) get_task_list();
 
     if (show_gpu == 1) read_gpu_status ();
+    if (show_gpu == 2) read_gpu_status_new ();
 
     /* check if task is new and marks the task that its checked*/
     for(i = 0; i < task_array->len; i++)
