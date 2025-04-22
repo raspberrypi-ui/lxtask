@@ -275,9 +275,11 @@ static float get_gpu_usage_new (void)
     static unsigned long long last_timestamp, last_val[5] = {0, 0, 0, 0, 0};
     float max, load[5];
     int i;
+    FILE *fp;
 
     // open the stats file
-    FILE *fp = fopen ("/sys/devices/platform/axi/1002000000.v3d/gpu_stats", "rb");
+    fp = fopen ("/sys/devices/platform/axi/1002000000.v3d/gpu_stats", "rb");
+    if (fp == NULL) fp = fopen ("/sys/devices/platform/v3dbus/fec00000.v3d/gpu_stats", "rb");
     if (fp == NULL) return -1.0;
 
     // read the stats file a line at a time
