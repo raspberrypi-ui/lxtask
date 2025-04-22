@@ -79,6 +79,12 @@ GtkWidget* create_main_window (void)
         show_gpu = 2;
         fclose (fp);
     }
+    fp = fopen ("/sys/devices/platform/v3dbus/fec00000.v3d/gpu_stats", "rb");
+    if (fp)
+    {
+        show_gpu = 2;
+        fclose (fp);
+    }
 
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (window), _("Task Manager"));
